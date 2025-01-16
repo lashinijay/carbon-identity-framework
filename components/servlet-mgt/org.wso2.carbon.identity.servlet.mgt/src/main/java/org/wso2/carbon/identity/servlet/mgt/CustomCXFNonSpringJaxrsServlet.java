@@ -87,16 +87,17 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
    private static final String DEFAULT_PARAMETER_SPLIT_CHAR = ",";
    private static final String SPACE_PARAMETER_SPLIT_CHAR = "space";
    private static final String JAXRS_APPLICATION_PARAM = "javax.ws.rs.Application";
+   private static final String MAX_ATTACHMENT_SIZE = "10485760";
 
-   private static Map<String, String> systemPropMap = new HashMap();
+   private static Map<String, String> systemPropMap = new HashMap<>();
    private ClassLoader classLoader;
    private Application application;
 
    static {
-       systemPropMap.put("rest.api.admin.attachment.max.size", "10485760");
-       systemPropMap.put("rest.api.devportal.attachment.max.size", "10485760");
-       systemPropMap.put("rest.api.publisher.attachment.max.size", "10485760");
-       systemPropMap.put("rest.api.service.catalog.attachment.max.size", "10485760");
+       systemPropMap.put("rest.api.admin.attachment.max.size", MAX_ATTACHMENT_SIZE);
+       systemPropMap.put("rest.api.devportal.attachment.max.size", MAX_ATTACHMENT_SIZE);
+       systemPropMap.put("rest.api.publisher.attachment.max.size", MAX_ATTACHMENT_SIZE);
+       systemPropMap.put("rest.api.service.catalog.attachment.max.size", MAX_ATTACHMENT_SIZE);
    }
 
    public CustomCXFNonSpringJaxrsServlet() {
@@ -114,6 +115,7 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
        this.application = app;
    }
 
+   @Override
    public void init(ServletConfig servletConfig) throws ServletException {
 
        super.init(servletConfig);
@@ -277,9 +279,9 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
            }
 
            if (!list.isEmpty()) {
-               if ("jaxrs.outInterceptors".equals(paramName)) {
+               if (OUT_INTERCEPTORS_PARAM.equals(paramName)) {
                    bean.setOutInterceptors(list);
-               } else if ("jaxrs.outFaultInterceptors".equals(paramName)) {
+               } else if (OUT_FAULT_INTERCEPTORS_PARAM.equals(paramName)) {
                    bean.setOutFaultInterceptors(list);
                } else {
                    bean.setInInterceptors(list);
@@ -345,7 +347,7 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
        }
    }
 
-   protected List<? extends Feature> getFeatures(ServletConfig servletConfig, String splitChar)
+   protected List<Feature> getFeatures(ServletConfig servletConfig, String splitChar)
            throws ServletException {
 
        String featuresList = servletConfig.getInitParameter(FEATURES_PARAM);
@@ -372,7 +374,7 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
        }
    }
 
-   protected List<?> getProviders(ServletConfig servletConfig, String splitChar) throws ServletException {
+   protected List<Object> getProviders(ServletConfig servletConfig, String splitChar) throws ServletException {
 
        String providersList = servletConfig.getInitParameter(PROVIDERS_PARAM);
        if (providersList == null) {
@@ -553,6 +555,7 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
 
    protected void configureSingleton(Object instance) {
 
+       //Do nothing
    }
 
    protected void createServerFromApplication(String applicationNames, ServletConfig servletConfig)
