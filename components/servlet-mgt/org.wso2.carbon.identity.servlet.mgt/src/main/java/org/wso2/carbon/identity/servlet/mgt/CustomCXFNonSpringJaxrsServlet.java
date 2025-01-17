@@ -228,10 +228,9 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
            int locationsLength = locations.length;
 
            for (int iterator = 0; iterator < locationsLength; ++iterator) {
-               String loc = locationsArray[iterator];
-               String theLoc = loc.trim();
-               if (!theLoc.isEmpty()) {
-                   list.add(theLoc);
+               String location = locationsArray[iterator].trim();
+               if (!location.isEmpty()) {
+                   list.add(location);
                }
            }
 
@@ -243,9 +242,9 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
 
    protected void setDocLocation(JAXRSServerFactoryBean bean, ServletConfig servletConfig) {
 
-       String wadlLoc = servletConfig.getInitParameter(DOC_LOCATION_PARAM);
-       if (wadlLoc != null) {
-           bean.setDocLocation(wadlLoc);
+       String docLocation = servletConfig.getInitParameter(DOC_LOCATION_PARAM);
+       if (docLocation != null) {
+           bean.setDocLocation(docLocation);
        }
    }
 
@@ -255,7 +254,7 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
        String value = servletConfig.getInitParameter(paramName);
        if (value != null) {
            String[] values = value.split(splitChar);
-           List<Interceptor<? extends Message>> list = new ArrayList();
+           List<Interceptor<? extends Message>> interceptors = new ArrayList();
            String[] valuesArray = values;
            int valuesLength = values.length;
 
@@ -268,9 +267,7 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
                        Class<?> intClass = this.loadClass(theValue, "Interceptor");
                        Object object = intClass.getDeclaredConstructor().newInstance();
                        this.injectProperties(object, props);
-                       list.add((Interceptor) object);
-                   } catch (ServletException exception) {
-                       throw exception;
+                       interceptors.add((Interceptor) object);
                    } catch (Exception exception) {
                        LOG.warning("Interceptor class " + theValue + " can not be created");
                        throw new ServletException(exception);
@@ -278,13 +275,13 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
                }
            }
 
-           if (!list.isEmpty()) {
+           if (!interceptors.isEmpty()) {
                if (OUT_INTERCEPTORS_PARAM.equals(paramName)) {
-                   bean.setOutInterceptors(list);
+                   bean.setOutInterceptors(interceptors);
                } else if (OUT_FAULT_INTERCEPTORS_PARAM.equals(paramName)) {
-                   bean.setOutFaultInterceptors(list);
+                   bean.setOutFaultInterceptors(interceptors);
                } else {
-                   bean.setInInterceptors(list);
+                   bean.setInInterceptors(interceptors);
                }
            }
        }
@@ -302,8 +299,6 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
                    Object object = intClass.getDeclaredConstructor().newInstance();
                    this.injectProperties(object, props);
                    bean.setInvoker((Invoker) object);
-               } catch (ServletException exception) {
-                   throw exception;
                } catch (Exception exception) {
                    LOG.warning("Invoker class " + theValue + " can not be created");
                    throw new ServletException(exception);
@@ -504,7 +499,6 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
                    provider = ProviderFactory.createProviderFromConstructor(resourceConstructor, values,
                            this.getBus(), isApplication, true);
                }
-
                Object instance = ((ProviderInfo) provider).getProvider();
                this.injectProperties(instance, props);
                this.configureSingleton(instance);
